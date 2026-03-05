@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DevOps Blueprint | Docker & GHCR</title>
+    <style>
+        :root {
+            --bg: #030712;
+            --card: #111827;
+            --primary: #38bdf8;
+            --success: #10b981;
+            --cmd: #fb7185;
+            --dir: #a78bfa;
+            --text: #f9fafb;
+            --text-muted: #9ca3af;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', 'JetBrains Mono', monospace; }
+        body { background: var(--bg); color: var(--text); padding-bottom: 80px; line-height: 1.6; }
+
+        .container { max-width: 1200px; margin: 0 auto; padding: 2rem; }
+
+        /* --- New: Getting Started Section --- */
+        .intro-grid {
+            display: grid;
+            grid-template-columns: 1.5fr 1fr;
+            gap: 2rem;
+            margin-bottom: 4rem;
+        }
+
+        .guide-card {
+            background: var(--card);
+            padding: 2rem;
+            border-radius: 16px;
+            border: 1px solid rgba(255,255,255,0.05);
+        }
+
+        .guide-card h2 { color: var(--primary); margin-bottom: 1rem; }
+        .guide-card p { color: var(--text-muted); margin-bottom: 1rem; font-size: 0.95rem; }
+
+        .feature-tag {
+            display: inline-block;
+            background: rgba(56, 189, 248, 0.1);
+            color: var(--primary);
+            padding: 4px 12px;
+            border-radius: 6px;
+            font-size: 0.75rem;
+            font-weight: bold;
+            margin-right: 8px;
+            margin-bottom: 8px;
+        }
+
+        /* --- Pipeline --- */
+        .pipeline {
+            display: flex; justify-content: space-between; align-items: center;
+            margin: 4rem 0; position: relative; padding: 0 40px;
+        }
+        .pipeline::before { content: ''; position: absolute; top: 25px; left: 10%; width: 80%; height: 2px; background: rgba(255,255,255,0.1); z-index: 0; }
+        
+        .step { position: relative; z-index: 1; text-align: center; width: 100px; }
+        .icon { 
+            width: 50px; height: 50px; background: var(--bg); border: 2px solid var(--primary);
+            border-radius: 10px; display: flex; align-items: center; justify-content: center;
+            margin: 0 auto 10px; font-size: 10px; font-weight: bold; transition: 0.4s;
+        }
+        .step.active .icon { background: var(--primary); color: var(--bg); transform: scale(1.2); box-shadow: 0 0 20px var(--primary); }
+        .step.done .icon { border-color: var(--success); color: var(--success); }
+
+        /* --- Terminal --- */
+        .terminal {
+            background: #000; border-radius: 12px; border: 1px solid #374151;
+            box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5); overflow: hidden;
+        }
+        .term-head { background: #1f2937; padding: 12px 20px; display: flex; gap: 8px; align-items: center; }
+        .t-dot { width: 12px; height: 12px; border-radius: 50%; }
+        .term-body { height: 400px; padding: 25px; font-size: 13px; overflow-y: auto; line-height: 1.7; color: #d1d5db; font-family: 'JetBrains Mono', monospace; }
+        
+        .p-cmd { color: var(--cmd); font-weight: bold; }
+        .p-comment { color: #6b7280; font-style: italic; }
+        .prompt { color: var(--primary); margin-right: 10px; }
+        
+        .btn-start {
+            background: var(--primary); color: var(--bg); border: none;
+            padding: 16px 32px; border-radius: 8px; font-weight: 800;
+            cursor: pointer; transition: 0.3s;
+        }
+        .btn-start:disabled { opacity: 0.4; filter: grayscale(1); }
+        .btn-start:hover:not(:disabled) { transform: translateY(-3px); box-shadow: 0 10px 20px rgba(56, 189, 248, 0.3); }
+
+        .cursor { display: inline-block; width: 8px; height: 16px; background: var(--primary); animation: blink 1s infinite; vertical-align: middle; }
+        @keyframes blink { 50% { opacity: 0; } }
+
+        @media (max-width: 768px) {
+            .intro-grid { grid-template-columns: 1fr; }
+            .pipeline { display: none; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <header style="margin-bottom: 3rem; text-align: center;">
+        <h1 style="font-size: 3rem; margin-bottom: 0.5rem; letter-spacing: -1px;">CI/CD Pipeline Blueprint</h1>
+        <p style="color: var(--text-muted);">A visual guide to Modern Containerized Deployment</p>
+    </header>
+
+    <section class="intro-grid">
+        <div class="guide-card">
+            <h2>Welcome, Developer!</h2>
+            <p>This project demonstrates a <strong>Production-Ready CI/CD Pipeline</strong>. In modern software, we don't just "upload files"; we package them into Containers (Docker) and automate the delivery (GitHub Actions).</p>
+            <div style="margin-top: 1rem;">
+                <span class="feature-tag">Docker</span>
+                <span class="feature-tag">GitHub Actions</span>
+                <span class="feature-tag">GHCR</span>
+                <span class="feature-tag">Automation</span>
+            </div>
+        </div>
+        <div class="guide-card" style="border-left: 4px solid var(--success);">
+            <h3>The Flow</h3>
+            <p>1. <strong>Develop:</strong> Write code and Dockerfile locally.</p>
+            <p>2. <strong>Push:</strong> Commit to GitHub to trigger the bot.</p>
+            <p>3. <strong>Ship:</strong> The bot builds and stores your image in GHCR.</p>
+            <p>4. <strong>Run:</strong> Pull the image anywhere in the world.</p>
+        </div>
+    </section>
+
+    <div class="pipeline">
+        <div class="step" id="s1"><div class="icon">INIT</div><span style="font-size: 0.7rem;">Setup</span></div>
+        <div class="step" id="s2"><div class="icon">DEV</div><span style="font-size: 0.7rem;">Local Test</span></div>
+        <div class="step" id="s3"><div class="icon">PUSH</div><span style="font-size: 0.7rem;">Git Push</span></div>
+        <div class="step" id="s4"><div class="icon">GHCR</div><span style="font-size: 0.7rem;">Registry</span></div>
+        <div class="step" id="s5"><div class="icon">PULL</div><span style="font-size: 0.7rem;">Prod Run</span></div>
+    </div>
+
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+        <h3>Interactive Workflow Terminal</h3>
+        <button class="btn-start" id="trigger" onclick="beginWorkflow()">START DEPLOYMENT</button>
+    </div>
+
+    <div class="terminal">
+        <div class="term-head">
+            <div class="t-dot" style="background: #ff5f56;"></div>
+            <div class="t-dot" style="background: #ffbd2e;"></div>
+            <div class="t-dot" style="background: #27c93f;"></div>
+            <span style="font-size: 11px; margin-left: 10px; color: #9ca3af;">local-machine: ~/workspace</span>
+        </div>
+        <div class="term-body" id="console">
+            <span class="prompt">$</span> Standing by. Click "START DEPLOYMENT" to simulate full lifecycle...<br>
+            <span class="cursor"></span>
+        </div>
+    </div>
+</div>
+
+<script>
+    const workflow = [
+        { step: 's1', type: 'cmd', text: 'mkdir cicd-demo && cd cicd-demo', comment: '# Step 1: Initialize project workspace' },
+        { step: 's1', type: 'cmd', text: 'touch index.html style.css Dockerfile', comment: '# Step 2: Create application files' },
+        { step: 's1', type: 'cmd', text: 'mkdir -p .github/workflows && touch .github/workflows/publish.yml', comment: '# Step 3: Configure GitHub Automation' },
+        
+        { step: 's2', type: 'cmd', text: 'docker build -t cicd-demo .', comment: '# Step 4: Test container build locally' },
+        { step: 's2', type: 'cmd', text: 'docker run -d -p 8080:80 cicd-demo', comment: '# Step 5: Verify site at http://localhost:8080' },
+        
+        { step: 's3', type: 'cmd', text: 'git init && git add .', comment: '# Step 6: Initialize repository' },
+        { step: 's3', type: 'cmd', text: 'git commit -m "Initial commit for CI/CD demo"', comment: '# Step 7: Save local changes' },
+        { step: 's3', type: 'cmd', text: 'git push -u origin main', comment: '# Step 8: Trigger GitHub Actions' },
+        
+        { step: 's4', type: 'log', text: '--- GITHUB ACTIONS RUNNING ---', color: '#38bdf8' },
+        { step: 's4', type: 'log', text: 'Logging into ghcr.io...', color: '#10b981' },
+        { step: 's4', type: 'log', text: 'Pushing image: ghcr.io/username/repo:latest', color: '#10b981' },
+        
+        { step: 's5', type: 'cmd', text: 'docker pull ghcr.io/username/repo:latest', comment: '# Step 9: Pull from Registry' },
+        { step: 's5', type: 'cmd', text: 'docker run -p 8080:80 ghcr.io/username/repo:latest', comment: '# Step 10: Run Production Container' },
+        { step: 's5', type: 'log', text: 'DEPLOYMENT SUCCESSFUL!', color: '#10b981' }
+    ];
+
+    async function beginWorkflow() {
+        const console = document.getElementById('console');
+        const btn = document.getElementById('trigger');
+        btn.disabled = true;
+        btn.innerText = "EXECUTING...";
+        console.innerHTML = '';
+
+        for (const item of workflow) {
+            document.querySelectorAll('.step').forEach(s => s.classList.remove('active'));
+            const currentStep = document.getElementById(item.step);
+            currentStep.classList.add('active');
+
+            const line = document.createElement('div');
+            line.style.marginBottom = '10px';
+
+            if (item.type === 'cmd') {
+                line.innerHTML = `<span class="prompt">$</span><span class="p-cmd">${item.text}</span><br><span class="p-comment" style="margin-left: 25px;">${item.comment}</span>`;
+            } else {
+                line.style.color = item.color;
+                line.style.fontWeight = 'bold';
+                line.innerHTML = `&gt; ${item.text}`;
+            }
+
+            console.appendChild(line);
+            console.scrollTop = console.scrollHeight;
+
+            await new Promise(r => setTimeout(r, 1500));
+            currentStep.classList.add('done');
+        }
+
+        console.innerHTML += `<br><span class="prompt">$</span> <span class="cursor"></span>`;
+        btn.disabled = false;
+        btn.innerText = "START DEPLOYMENT";
+    }
+</script>
+
+</body>
+</html>
